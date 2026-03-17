@@ -32,7 +32,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: generated-html
-          path: output.html # Ensure this matches your script's output name
+          path: index.html # Ensure this matches your script's output name
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

@@ -279,7 +279,7 @@ def main():
 
     html = build_html(events)
 
-    outfile = "output.html"
+    outfile = "index.html"
     with open(outfile, "w", encoding="utf-8") as f:
         f.write(html)
 

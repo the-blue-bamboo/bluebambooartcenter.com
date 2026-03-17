@@ -1,0 +1,35 @@
+name: Run Python Script Daily
+
+on:
+  schedule:
+    # This runs at 00:00 UTC every day
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allows you to run it manually for testing
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          # If you don't have a requirements file, use:
+          # pip install pandas jinja2 (or whatever you use)
+
+      - name: Run script
+        run: python scrape.py
+
+      - name: Upload HTML as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-html
+          path: output.html # Ensure this matches your script's output name

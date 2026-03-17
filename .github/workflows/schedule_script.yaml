@@ -33,3 +33,10 @@ jobs:
         with:
           name: generated-html
           path: output.html # Ensure this matches your script's output name
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./ # If your HTML is in the root. If in a folder, use ./folder_name
+          publish_branch: gh-pages

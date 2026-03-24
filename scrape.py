@@ -153,116 +153,280 @@ def filter_upcoming(events):
 def build_html(events):
     event_blocks = []
     for ev in events:
-        img_html = ""
+        parts = []
+
+        # Image
         if ev.get("image"):
-            img_html = (
-                f'<img src="{ev["image"]}" alt="{ev["title"]}" '
-                f'style="width:100%;height:auto;display:block;'
-                f'border-radius:8px 8px 0 0;" />'
+            parts.append(
+                f'<figure class="image justify_center size_l">\n'
+                f'    <a class="no-pjax" href="{ev["link"]}">'
+                f'<img src="{ev["image"]}" alt="{ev["title"]}"></a>\n'
+                f'</figure>'
             )
 
-        title_html = f'<a href="{ev["link"]}" style="color:#111;text-decoration:underline;text-underline-offset:2px;">{ev["title"]}</a>'
+        # Title
+        parts.append(
+            f'<p>\n'
+            f'    <span class="text-huge"><strong>'
+            f'<a class="no-pjax" href="{ev["link"]}">{ev["title"]}</a>'
+            f'</strong></span>\n'
+            f'</p>'
+        )
 
-        datetime_html = ""
+        # Date/time
         if ev.get("datetime"):
-            datetime_html = (
-                f'<p style="margin:0 0 14px 0;font-size:13px;color:#666;'
-                f'letter-spacing:0.3px;text-transform:uppercase;">'
-                f'{ev["datetime"]}</p>'
+            parts.append(
+                f'<p>\n'
+                f'    <span class="text-big">{ev["datetime"]}</span>\n'
+                f'</p>'
             )
 
-        desc_html = ""
+        # Description
         if ev.get("description"):
-            paragraphs = ev["description"].split("\n\n")
-            desc_parts = []
-            for p in paragraphs:
-                desc_parts.append(
-                    f'<p style="margin:0 0 10px 0;font-size:15px;'
-                    f'line-height:1.6;color:#333;">{p}</p>'
-                )
-            desc_html = "".join(desc_parts)
+            for p in ev["description"].split("\n\n"):
+                if p:
+                    parts.append(f'<p>\n    {p}\n</p>')
 
-        price_html = ""
+        # Price
         if ev.get("price"):
-            price_html = (
-                f'<p style="margin:12px 0 0 0;font-size:14px;color:#444;'
-                f'font-style:italic;">'
-                f'{ev["price"]}</p>'
+            parts.append(
+                f'<p>\n'
+                f'    <i>{ev["price"]}</i>\n'
+                f'</p>'
             )
 
-        buttons = []
+        # Ticket link
         if ev.get("ticket_url"):
-            buttons.append(
-                f'<a href="{ev["ticket_url"]}" '
-                f'style="display:inline-block;padding:10px 24px;'
-                f'background-color:#111;color:#fff;font-size:14px;'
-                f'font-weight:600;text-decoration:none;border-radius:6px;'
-                f'margin-right:10px;">Get Tickets</a>'
+            parts.append(
+                f'<p>\n'
+                f'    <span class="text-big"><strong>'
+                f'<a class="no-pjax" href="{ev["ticket_url"]}">Get Tickets</a>'
+                f'</strong></span>\n'
+                f'</p>'
             )
-        buttons.append(
-            f'<a href="{ev["link"]}" '
-            f'style="display:inline-block;padding:10px 24px;'
-            f'background-color:#fff;color:#111;font-size:14px;'
-            f'font-weight:600;text-decoration:none;border-radius:6px;'
-            f'border:1px solid #ccc;">Share</a>'
-        )
-        buttons_html = (
-            f'<p style="margin:18px 0 0 0;">{"".join(buttons)}</p>'
-        )
 
-        block = f"""
-    <tr><td style="padding:0 0 20px 0;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-             style="border-radius:8px;overflow:hidden;border:1px solid #e8e8e8;">
-        <tr><td>
-          {img_html}
-        </td></tr>
-        <tr><td style="padding:20px 24px 24px 24px;">
-          <h2 style="margin:0 0 8px 0;font-size:22px;font-weight:700;line-height:1.3;">
-            {title_html}
-          </h2>
-          {datetime_html}
-          {desc_html}
-          {price_html}
-          {buttons_html}
-        </td></tr>
-      </table>
-    </td></tr>"""
-        event_blocks.append(block)
+        parts.append('<hr>')
+
+        event_blocks.append("\n".join(parts))
 
     events_html = "\n".join(event_blocks)
 
-    return f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Blue Bamboo Center for the Arts — Upcoming Events</title>
-</head>
-<body style="margin:0;padding:0;background-color:#f5f5f5;color:#000000;
-             font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-         style="max-width:640px;margin:0 auto;padding:30px 20px;">
-    <tr><td style="text-align:center;padding:10px 0 40px 0;">
-      <h1 style="margin:0;font-size:28px;color:#111;font-weight:800;letter-spacing:-0.5px;">
-        Blue Bamboo Center for the Arts
-      </h1>
-      <p style="margin:8px 0 0 0;font-size:15px;color:#888;font-weight:400;">
-        Upcoming Events
-      </p>
-    </td></tr>
-{events_html}
-    <tr><td style="padding:40px 0 20px 0;text-align:center;
-                    font-size:13px;color:#999;line-height:1.6;">
-      <p style="margin:0 0 4px 0;font-weight:600;color:#666;">Blue Bamboo Center for the Arts</p>
-      460 E New England Ave, Winter Park, FL 32789<br>
-      407-636-9951<br><br>
-      <a href="https://bluebambooartcenter.com/" style="color:#111;text-decoration:underline;text-underline-offset:2px;">
-        bluebambooartcenter.com</a>
-    </td></tr>
-  </table>
-</body>
-</html>"""
+    template = r"""<style>
+  figure.table { margin: 0 !important; display: block !important; }
+</style>
+<figure class="image justify_center size_l">
+    <a class="no-pjax" href="https://bluebambooartcenter.com/"><img style="aspect-ratio:1076/602;" src="https://images.zoogletools.com/s:bzglfiles/u/181211/80b196a5c6e91f35bf04f1c2cd3c5b316ba89c28/original/blue-bamboo-logo.png/!!/meta:eyJzcmNCdWNrZXQiOiJiemdsZmlsZXMifQ==" alt="Blue Bamboo Logo which links to the website." width="1076" height="602"></a>
+</figure>
+<p>
+    &nbsp;
+</p>
+EVENTS_PLACEHOLDER
+<p>
+    <strong>Bamboo Center For the Arts</strong>&nbsp;is a registered 501(c)(3), NON-PROFIT, charitable corporation. Registration #: CH46010
+</p>
+<p style="text-align:center;">
+    <span class="text-huge" style="color:rgb(0,0,0);">The Future is at the Blue Bamboo!</span>
+</p>
+<p style="text-align:center;">
+    <span class="text-huge" style="color:rgb(0,0,0);">Your Music Community&nbsp;</span>
+</p>
+<p>
+    <span class="text-big" style="color:rgb(0,0,0);"><i>Your attendance and your gift directly supports:</i></span>
+</p>
+<p>
+    <span style="color:rgb(0,0,0);">🎶</span><span class="text-big" style="color:rgb(0,0,0);"> The Encore Room is open NOW - 184 seats!</span>
+</p>
+<p>
+    <span style="color:rgb(0,0,0);">🎶</span><span class="text-big" style="color:rgb(0,0,0);"> The Bravo Room is open soon - 60 seats!</span>
+</p>
+<p>
+    <span style="color:rgb(0,0,0);">🎶 </span><span class="text-big" style="color:rgb(0,0,0);">Spaces for artists to create and connect</span>
+</p>
+<p>
+    <span style="color:rgb(0,0,0);">🎶 </span><span class="text-big" style="color:rgb(0,0,0);">Outdoor performances for the whole community</span>
+</p>
+<p>
+    &nbsp;
+</p>
+<p>
+    <span class="text-big" style="color:rgb(0,0,0);">Help us expand and grow. . . .</span>
+</p>
+<p>
+    <span class="text-big" style="color:rgb(0,0,0);">Your contributions are welcome - </span><a class="no-pjax" href="https://checkout.square.site/merchant/8Q64QYG9C36EP/checkout/H3B5BSF63GIZQGJIX4YARSTW" data-link-type="url"><span class="text-big" style="color:rgb(0,0,0);">DONATE</span></a><span class="text-big" style="color:rgb(0,0,0);">.</span><span style="color:rgb(0,0,0);">&nbsp;</span>
+</p>
+<p>
+    <span style="color:rgb(0,0,0);">For more information on how you can be a part of this music community, contact us at: info@bluebambooartcenter.com.</span>
+</p>
+<p>
+    &nbsp;
+</p>
+<figure class="image justify_center size_l">
+    <img style="aspect-ratio:1000/1333;" src="//images.zoogletools.com/s:bzglfiles/u/181211/38308d6a3ba057f4ffa4341c98c2c7810243c683/original/blue-bamboo-gets-new-signage.jpg/!!/meta:eyJzcmNCdWNrZXQiOiJiemdsZmlsZXMifQ==" width="1000" height="1333">
+</figure>
+<p>
+    &nbsp;
+</p>
+<p>
+    &nbsp;
+</p>
+<p>
+    &nbsp;
+</p>
+<hr>
+<p>
+    <span style="color:hsl(0,0%,0%);">Check out our new sponsor -</span>
+</p>
+<p>
+    <span class="text-big">&nbsp;</span><a class="no-pjax" href="https://www.floridasmoothjazz.com" data-link-type="url"><span class="text-big">Floridasmoothjazz.com</span></a><span class="text-big">&nbsp;</span>
+</p>
+<hr>
+<p>
+    <span class="text-big"><strong>Support</strong></span>
+</p>
+<p>
+    Blue Bamboo Center for the Arts is sponsored in part by United Arts of Central Florida, State of Florida, Department of State, Division of Arts and Culture, the Florida Council on Arts and Culture, the National Endowment for the Arts, Orange County Government Florida Arts &amp; Cultural Affairs, and the City of Winter Park, Florida.
+</p>
+<p>
+    &nbsp;
+</p>
+<p>
+    &nbsp;
+</p>
+<p>
+    &nbsp;
+</p>
+<figure class="image justify_left size_s">
+    <img src="https://images.zoogletools.com/u/181211/53391deef9416fff3889e31db6428763f7c1d774/original/city-of-winter-park-logo.png/!!/meta:eyJzcmNCdWNrZXQiOiJiemdsZmlsZXMifQ==/b:W1sic2l6ZSIsInNtYWxsIl1d.png">
+</figure>
+<figure class="image justify_inline size_s">
+    <img src="https://images.zoogletools.com/s:bzglfiles/u/181211/bdc6195dc4c61377c30608c84579e019b20b2eb7/original/florida-arts-and-culture-logo-vertical-square.png/!!/meta:eyJzcmNCdWNrZXQiOiJiemdsZmlsZXMifQ==/b:W1sic2l6ZSIsInNtYWxsIl1d.png" alt="">
+</figure>
+<figure class="image justify_inline size_s">
+    <img src="https://images.zoogletools.com/u/181211/9ff4c260bef25bbc93adb23f829edcb1d26729cd/original/orange-county-arts-cultural-affairs.jpg/!!/meta:eyJzcmNCdWNrZXQiOiJiemdsZmlsZXMifQ==/b:W1sic2l6ZSIsInNtYWxsIl1d.jpg">
+</figure>
+<figure class="image justify_inline size_s">
+    <img src="//images.zoogletools.com/s:bzglfiles/u/181211/7964eccea831e6cd95d6bd6975c3ba7b3b9be9ce/original/united-arts-central-florida.webp/!!/meta:eyJzcmNCdWNrZXQiOiJiemdsZmlsZXMifQ==" height="870">
+</figure>
+<p>
+    &nbsp;
+</p>
+<p>
+    We're also proud to partner with these non-profit organizations:
+</p>
+<p>
+    &nbsp;
+</p>
+<figure class="image justify_center size_m">
+    <img src="https://images.zoogletools.com/s:bzglfiles/u/181211/eb5281017193b4fcaa433e776d5c2f49a2a10ff5/original/pam-logo-retina-442x146-1920w.png" height="146">
+</figure>
+<p>
+    &nbsp;&nbsp;
+</p>
+<p style="text-align:center;">
+    <span class="text-big"><i><strong>Sincere thanks to our current "Hang" sponsors:</strong></i></span>
+</p>
+<figure class="table">
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    <p style="text-align:center;">
+                        <span class="text-big"><strong>Gary Lambert Salon (2x)</strong></span>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p style="text-align:center;">
+                        <span class="text-big"><strong>Epoch Residential</strong></span>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p style="text-align:center;">
+                        <span class="text-big"><strong>FK Architecture</strong></span>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p style="text-align:center;">
+                        <span class="text-big"><strong>Frank Santos</strong></span>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p style="text-align:center;">
+                        <span class="text-big"><strong>Grafton Wealth Advisors</strong></span>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p style="text-align:center;">
+                        <span class="text-big"><strong>Philip Tiedtke</strong></span>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p style="text-align:center;">
+                        <span class="text-big"><strong>S &amp; W Kitchens</strong></span>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p style="text-align:center;">
+                        <span class="text-big"><strong>Irventu</strong></span>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p style="text-align:center;">
+                        <span class="text-big"><strong>Mike and Claire Jacobs</strong></span>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p style="text-align:center;">
+                        <span class="text-big"><strong>Nicki Wise</strong></span>
+                    </p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</figure>
+<p>
+    &nbsp;
+</p>
+<hr>
+<p>
+    <span class="text-big"><strong>Other information</strong></span>
+</p>
+<p>
+    <strong>Please subscribe to our YouTube channel:&nbsp;</strong><a class="no-pjax" href="https://www.youtube.com/c/BlueBambooMusic/videos" target="_blank" data-link-type="url" contents="Click here to see shows on our YouTube channel."><strong>Click here to see shows on our YouTube channel.</strong></a><strong>&nbsp;</strong>
+</p>
+<hr>
+<p>
+    <span class="text-big"><span><strong>Show alerts:</strong></span></span>
+</p>
+<p>
+    If you know of others you'd like to add to this email list, please send an email to <span>info@bluebambooartcenter.com</span>
+</p>
+<p>
+    Visit <a class="no-pjax" href="https://bluebambooartcenter.com/home" target="_blank" data-link-type="page" data-link-label="Home" contents="bluebambooartcenter.com">bluebambooartcenter.com</a> for updates.
+</p>
+<hr>
+<p>
+    BLUE BAMBOO CENTER FOR THE ARTS IS A REGISTERED 501(C)(3) CHARITABLE ORGANIZATION. <span style="color:hsl(0,0%,0%);">A COPY OF THE OFFICIAL REGISTRATION AND FINANCIAL INFORMATION MAY BE OBTAINED FROM THE DIVISION OF CONSUMER SERVICES BY CALLING TOLL-FREE 1-800-HELP-FLA OR ONLINE AT </span><a class="no-pjax" href="http://www.floridaconsumerhelp.com/"><span style="color:hsl(0,0%,0%);">www.FloridaConsumerHelp.com</span></a><span style="color:hsl(0,0%,0%);">, REGISTRATION DOES NOT IMPLY ENDORSEMENT, APPROVAL, OR RECOMMENDATION BY THE STATE. REGISTRATION #: CH46010</span>
+</p>"""
+
+    return template.replace("EVENTS_PLACEHOLDER", events_html)
 
 
 def main():
